@@ -26,7 +26,7 @@ int main() {
     }
 
     int index = 0;
-    for (; fscanf(fptr, "%d", &nums[index]) == 1;) {
+    while (fscanf(fptr, "%d", &nums[index]) == 1) {
         index++;
         if (index == size) {
             size *= 2;
