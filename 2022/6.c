@@ -143,6 +143,9 @@ int main() {
 
     run(instructions);
 
+    for (int i = 0; i < index; i++) {
+        free(instructions[i]);
+    }
     free(instructions);
 
     return 0;
