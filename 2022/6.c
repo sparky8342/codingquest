@@ -3,21 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum {
-    ADD = 1,
-    MOD,
-    DIV,
-    MOV,
-    JMP,
-    JIF,
-    CEQ,
-    CGE,
-    OUT,
-    END,
-} OPCODE;
-
 typedef struct {
-    OPCODE opcode;
+    char opcode[4];
     char arg1[3];
     char arg2[3];
 } INSTRUCTION;
@@ -25,28 +12,10 @@ typedef struct {
 INSTRUCTION *parse_line(char buffer[]) {
     INSTRUCTION *instruction = (INSTRUCTION *)malloc(sizeof(INSTRUCTION));
 
-    char op[] = {buffer[0], buffer[1], buffer[2], '\0'};
-    if (strcmp(op, "ADD") == 0) {
-        instruction->opcode = ADD;
-    } else if (strcmp(op, "MOD") == 0) {
-        instruction->opcode = MOD;
-    } else if (strcmp(op, "DIV") == 0) {
-        instruction->opcode = DIV;
-    } else if (strcmp(op, "MOV") == 0) {
-        instruction->opcode = MOV;
-    } else if (strcmp(op, "JMP") == 0) {
-        instruction->opcode = JMP;
-    } else if (strcmp(op, "JIF") == 0) {
-        instruction->opcode = JIF;
-    } else if (strcmp(op, "CEQ") == 0) {
-        instruction->opcode = CEQ;
-    } else if (strcmp(op, "CGE") == 0) {
-        instruction->opcode = CGE;
-    } else if (strcmp(op, "OUT") == 0) {
-        instruction->opcode = OUT;
-    } else if (strcmp(op, "END") == 0) {
-        instruction->opcode = END;
-    }
+    instruction->opcode[0] = buffer[0];
+    instruction->opcode[1] = buffer[1];
+    instruction->opcode[2] = buffer[2];
+    instruction->opcode[3] = '\0';
 
     int pos = 0;
     int arg = 1;
@@ -105,31 +74,31 @@ void run(INSTRUCTION **instructions) {
     while (1) {
         INSTRUCTION *ins = instructions[pos];
 
-        if (ins->opcode == ADD) {
+        if (strcmp(ins->opcode, "ADD") == 0) {
             registers[ins->arg1[0] - 'A'] += parse_arg(ins->arg2, registers);
-        } else if (ins->opcode == MOD) {
+        } else if (strcmp(ins->opcode, "MOD") == 0) {
             registers[ins->arg1[0] - 'A'] %= parse_arg(ins->arg2, registers);
-        } else if (ins->opcode == DIV) {
+        } else if (strcmp(ins->opcode, "DIV") == 0) {
             registers[ins->arg1[0] - 'A'] /= parse_arg(ins->arg2, registers);
-        } else if (ins->opcode == MOV) {
+        } else if (strcmp(ins->opcode, "MOV") == 0) {
             registers[ins->arg1[0] - 'A'] = parse_arg(ins->arg2, registers);
-        } else if (ins->opcode == JMP) {
+        } else if (strcmp(ins->opcode, "JMP") == 0) {
             pos += parse_arg(ins->arg1, registers);
             continue;
-        } else if (ins->opcode == JIF) {
+        } else if (strcmp(ins->opcode, "JIF") == 0) {
             if (compare) {
                 pos += parse_arg(ins->arg1, registers);
                 continue;
             }
-        } else if (ins->opcode == CEQ) {
+        } else if (strcmp(ins->opcode, "CEQ") == 0) {
             compare = parse_arg(ins->arg1, registers) ==
                       parse_arg(ins->arg2, registers);
-        } else if (ins->opcode == CGE) {
+        } else if (strcmp(ins->opcode, "CGE") == 0) {
             compare = parse_arg(ins->arg1, registers) >=
                       parse_arg(ins->arg2, registers);
-        } else if (ins->opcode == OUT) {
+        } else if (strcmp(ins->opcode, "OUT") == 0) {
             printf("%lld\n", parse_arg(ins->arg1, registers));
-        } else if (ins->opcode == END) {
+        } else if (strcmp(ins->opcode, "END") == 0) {
             break;
         }
 
