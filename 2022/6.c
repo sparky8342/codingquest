@@ -18,36 +18,9 @@ typedef enum {
 
 typedef struct {
     OPCODE opcode;
-
-    int source_a_val;
-    char source_a_reg;
-    bool source_a_use_val;
-
-    int source_b_val;
-    char source_b_reg;
-    bool source_b_use_val;
-
-    char target;
+    char arg1[3];
+    char arg2[3];
 } INSTRUCTION;
-
-int parse_num(char buffer[], int start) {
-    bool negative = false;
-    if (buffer[start] == '-') {
-        negative = true;
-        start++;
-    }
-    int n = 0;
-    for (int i = start; i < strlen(buffer); i++) {
-        if (buffer[i] < '0' || buffer[i] > '9') {
-            break;
-        }
-        n = n * 10 + buffer[i] - '0';
-    }
-    if (negative) {
-        n *= -1;
-    }
-    return n;
-}
 
 INSTRUCTION *parse_line(char buffer[]) {
     INSTRUCTION *instruction = (INSTRUCTION *)malloc(sizeof(INSTRUCTION));
@@ -75,59 +48,53 @@ INSTRUCTION *parse_line(char buffer[]) {
         instruction->opcode = END;
     }
 
-    if (instruction->opcode == ADD || instruction->opcode == MOD ||
-        instruction->opcode == DIV || instruction->opcode == MOV) {
-
-        instruction->target = buffer[4];
-
-        char source = buffer[6];
-        if (source >= 'A' && source <= 'L') {
-            instruction->source_a_reg = source;
-            instruction->source_a_use_val = false;
-        } else {
-            instruction->source_a_val = parse_num(buffer, 6);
-            instruction->source_a_use_val = true;
+    int pos = 0;
+    int arg = 1;
+    for (int i = 4; i < strlen(buffer); i++) {
+        if (buffer[i] == '\n') {
+            break;
+        } else if (buffer[i] == ' ') {
+            arg = 2;
+            pos = 0;
+            continue;
         }
-    } else if (instruction->opcode == JMP || instruction->opcode == JIF ||
-               instruction->opcode == OUT) {
-
-        char source = buffer[4];
-        if (source >= 'A' && source <= 'L') {
-            instruction->source_a_reg = source;
-            instruction->source_a_use_val = false;
-        } else {
-            instruction->source_a_val = parse_num(buffer, 4);
-            instruction->source_a_use_val = true;
+        if (arg == 1) {
+            instruction->arg1[pos] = buffer[i];
+        } else if (arg == 2) {
+            instruction->arg2[pos] = buffer[i];
         }
-    } else if (instruction->opcode == CEQ || instruction->opcode == CGE) {
-        char source = buffer[4];
-        if (source >= 'A' && source <= 'L') {
-            instruction->source_a_reg = source;
-            instruction->source_a_use_val = false;
-        } else {
-            instruction->source_a_val = parse_num(buffer, 4);
-            instruction->source_a_use_val = true;
-        }
-
-        int index;
-        for (int i = 5; i < strlen(buffer); i++) {
-            if (buffer[i] == ' ') {
-                index = i + 1;
-                break;
-            }
-        }
-
-        source = buffer[index];
-        if (source >= 'A' && source <= 'L') {
-            instruction->source_b_reg = source;
-            instruction->source_b_use_val = false;
-        } else {
-            instruction->source_b_val = parse_num(buffer, index);
-            instruction->source_b_use_val = true;
-        }
+        pos++;
     }
 
     return instruction;
+}
+
+long long parse_num(char arg[]) {
+    bool negative = false;
+    int start = 0;
+    if (arg[start] == '-') {
+        negative = true;
+        start++;
+    }
+    long long n = 0;
+    for (int i = start; i < strlen(arg); i++) {
+        if (arg[i] < '0' || arg[i] > '9') {
+            break;
+        }
+        n = n * 10 + arg[i] - '0';
+    }
+    if (negative) {
+        n *= -1;
+    }
+    return n;
+}
+
+long long parse_arg(char arg[], long long registers[12]) {
+    if (arg[0] >= 'A' && arg[0] <= 'L') {
+        return registers[arg[0] - 'A'];
+    } else {
+        return parse_num(arg);
+    }
 }
 
 void run(INSTRUCTION **instructions) {
@@ -138,44 +105,30 @@ void run(INSTRUCTION **instructions) {
     while (1) {
         INSTRUCTION *ins = instructions[pos];
 
-        long long source_a;
-        if (ins->source_a_use_val) {
-            source_a = (long long)ins->source_a_val;
-        } else {
-            source_a = registers[ins->source_a_reg - 'A'];
-        }
-
-        long long source_b;
-        if (ins->opcode == CEQ || ins->opcode == CGE) {
-            if (ins->source_b_use_val) {
-                source_b = (long long)ins->source_b_val;
-            } else {
-                source_b = registers[ins->source_b_reg - 'A'];
-            }
-        }
-
         if (ins->opcode == ADD) {
-            registers[ins->target - 'A'] += source_a;
+            registers[ins->arg1[0] - 'A'] += parse_arg(ins->arg2, registers);
         } else if (ins->opcode == MOD) {
-            registers[ins->target - 'A'] %= source_a;
+            registers[ins->arg1[0] - 'A'] %= parse_arg(ins->arg2, registers);
         } else if (ins->opcode == DIV) {
-            registers[ins->target - 'A'] /= source_a;
+            registers[ins->arg1[0] - 'A'] /= parse_arg(ins->arg2, registers);
         } else if (ins->opcode == MOV) {
-            registers[ins->target - 'A'] = source_a;
+            registers[ins->arg1[0] - 'A'] = parse_arg(ins->arg2, registers);
         } else if (ins->opcode == JMP) {
-            pos += source_a;
+            pos += parse_arg(ins->arg1, registers);
             continue;
         } else if (ins->opcode == JIF) {
             if (compare) {
-                pos += source_a;
+                pos += parse_arg(ins->arg1, registers);
                 continue;
             }
         } else if (ins->opcode == CEQ) {
-            compare = source_a == source_b;
+            compare = parse_arg(ins->arg1, registers) ==
+                      parse_arg(ins->arg2, registers);
         } else if (ins->opcode == CGE) {
-            compare = source_a >= source_b;
+            compare = parse_arg(ins->arg1, registers) >=
+                      parse_arg(ins->arg2, registers);
         } else if (ins->opcode == OUT) {
-            printf("%lld\n", source_a);
+            printf("%lld\n", parse_arg(ins->arg1, registers));
         } else if (ins->opcode == END) {
             break;
         }
