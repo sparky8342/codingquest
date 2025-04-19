@@ -1,3 +1,4 @@
+#include "cvector.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -114,39 +115,17 @@ int main() {
         return 1;
     }
 
-    int size = 1;
+    INSTRUCTION **instructions = NULL;
 
-    INSTRUCTION **instructions = malloc(size * sizeof(INSTRUCTION *));
-
-    if (instructions == NULL) {
-        printf("Cannot malloc\n");
-        return 1;
-    }
-
-    int index = 0;
     char buffer[100];
-
     while (fgets(buffer, sizeof(buffer), fptr) != NULL) {
         INSTRUCTION *instruction = parse_line(buffer);
-        instructions[index] = instruction;
-
-        index++;
-        if (index == size) {
-            size *= 2;
-            instructions = realloc(instructions, size * sizeof(INSTRUCTION *));
-            if (instructions == NULL) {
-                printf("Cannot realloc\n");
-                return 1;
-            }
-        }
+        cvector_push_back(instructions, instruction);
     }
 
     run(instructions);
 
-    for (int i = 0; i < index; i++) {
-        free(instructions[i]);
-    }
-    free(instructions);
+    cvector_free(instructions);
 
     return 0;
 }
