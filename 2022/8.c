@@ -14,8 +14,6 @@ int get_char_position(char ch) {
     return -1;
 }
 
-int get_char(int n) { return characters[n - 1]; }
-
 int main() {
     FILE *fptr;
     fptr = fopen("inputs/8.txt", "r");
@@ -27,6 +25,10 @@ int main() {
     char buffer[500];
     fgets(buffer, sizeof(buffer), fptr);
 
+    int secret_pos[sizeof(secret) - 1];
+    for (int i = 0; i < sizeof(secret); i++) {
+        secret_pos[i] = get_char_position(secret[i]);
+    }
     int secret_p = 0;
 
     int len = sizeof(characters) - 1;
@@ -37,7 +39,7 @@ int main() {
         }
 
         int n = get_char_position(buffer[i]);
-        int s = get_char_position(secret[secret_p]);
+        int s = secret_pos[secret_p];
 
         if (n == -1 || s == -1) {
             printf("%c", buffer[i]);
@@ -48,7 +50,7 @@ int main() {
             } else if (new_char_pos < 1) {
                 new_char_pos += len;
             }
-            printf("%c", get_char(new_char_pos));
+            printf("%c", characters[new_char_pos - 1]);
         }
         secret_p = (secret_p + 1) % (sizeof(secret) - 1);
     }
