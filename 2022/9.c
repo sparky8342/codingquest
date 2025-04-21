@@ -73,8 +73,6 @@ int main() {
 
     find_start_end(grid, start, end);
 
-    // TODO look at using a linked list queue instead
-
     struct Pos *head = start;
     struct Pos *tail = start;
 
@@ -82,7 +80,8 @@ int main() {
 
     static int dirs[] = {0, 1, 0, -1, 1, 0, -1, 0};
 
-    while (1) {
+    int len = 1;
+    while (len > 0) {
         struct Pos *pos = head;
 
         if (pos->x == end->x && pos->y == end->y) {
@@ -110,11 +109,13 @@ int main() {
             tail->y = next_y;
             tail->steps = pos->steps + 1;
             visited[tail->y][tail->x] = true;
+            len++;
         }
 
         struct Pos *last = head;
         head = head->next;
         free(last);
+        len--;
     }
 
     return 0;
