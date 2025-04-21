@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdio.h>
 
 static char secret[] = "Roads? Where We're Going, We Don't Need Roads.";
