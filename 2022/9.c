@@ -1,19 +1,20 @@
-#include "cvector.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
+struct Pos {
     int x;
     int y;
     int steps;
+    struct Pos *next;
 } Pos;
 
 int width;
 int height;
 
-void find_start_end(char grid[height][width], Pos *start, Pos *end) {
+void find_start_end(char grid[height][width], struct Pos *start,
+                    struct Pos *end) {
     for (int x = 0; x < width; x++) {
         if (grid[0][x] == ' ') {
             start->x = x;
@@ -66,22 +67,23 @@ int main() {
         memcpy(grid[row], buffer, width);
     }
 
-    Pos *start = (Pos *)malloc(sizeof(Pos));
+    struct Pos *start = (struct Pos *)malloc(sizeof(struct Pos));
     start->steps = 1;
-    Pos *end = (Pos *)malloc(sizeof(Pos));
+    struct Pos *end = (struct Pos *)malloc(sizeof(struct Pos));
 
     find_start_end(grid, start, end);
 
     // TODO look at using a linked list queue instead
-    Pos **queue = NULL;
-    cvector_push_back(queue, start);
+
+    struct Pos *head = start;
+    struct Pos *tail = start;
+
     visited[start->y][start->x] = true;
 
     static int dirs[] = {0, 1, 0, -1, 1, 0, -1, 0};
 
-    while (cvector_size(queue) > 0) {
-        Pos *pos = *cvector_at(queue, 0);
-        cvector_erase(queue, 0);
+    while (1) {
+        struct Pos *pos = head;
 
         if (pos->x == end->x && pos->y == end->y) {
             printf("%d\n", pos->steps);
@@ -102,16 +104,18 @@ int main() {
                 continue;
             }
 
-            Pos *next = (Pos *)malloc(sizeof(Pos));
-            next->x = next_x;
-            next->y = next_y;
-            next->steps = pos->steps + 1;
-            cvector_push_back(queue, next);
-            visited[next->y][next->x] = true;
+            tail->next = (struct Pos *)malloc(sizeof(struct Pos));
+            tail = tail->next;
+            tail->x = next_x;
+            tail->y = next_y;
+            tail->steps = pos->steps + 1;
+            visited[tail->y][tail->x] = true;
         }
-    }
 
-    cvector_free(queue);
+        struct Pos *last = head;
+        head = head->next;
+        free(last);
+    }
 
     return 0;
 }
