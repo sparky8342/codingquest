@@ -13,22 +13,13 @@ bool check_win(int board) {
 }
 
 int play_moves(int moves[9]) {
-    int board1 = 0;
-    int board2 = 0;
+    int boards[2] = {0, 0};
 
     for (int i = 0; i < 9; i++) {
-        int player = (i & 1) + 1;
-
-        if (player == 1) {
-            board1 |= (1 << (moves[i] - 1));
-            if (check_win(board1)) {
-                return 1;
-            }
-        } else if (player == 2) {
-            board2 |= (1 << (moves[i] - 1));
-            if (check_win(board2)) {
-                return 2;
-            }
+        int player = (i & 1);
+        boards[player] |= (1 << (moves[i] - 1));
+        if (check_win(boards[player])) {
+            return player + 1;
         }
     }
 
@@ -43,9 +34,7 @@ int main() {
         return 1;
     }
 
-    int wins1 = 0;
-    int wins2 = 0;
-    int draws = 0;
+    int results[3] = {0, 0, 0};
 
     int moves[9];
     while (fscanf(fptr, "%d %d %d %d %d %d %d %d %d", &moves[0], &moves[1],
@@ -53,17 +42,11 @@ int main() {
                   &moves[7], &moves[8]) == 9) {
 
         int winner = play_moves(moves);
-        if (winner == 1) {
-            wins1++;
-        } else if (winner == 2) {
-            wins2++;
-        } else {
-            draws++;
-        }
+        results[winner]++;
     }
     fclose(fptr);
 
-    printf("%d\n", wins1 * wins2 * draws);
+    printf("%d\n", results[0] * results[1] * results[2]);
 
     return 0;
 }
