@@ -3,7 +3,6 @@
 #include <stdlib.h>
 
 #define SIZE 20
-// #define SIZE 8
 
 struct Pos {
     int x;
