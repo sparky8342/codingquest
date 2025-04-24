@@ -1,6 +1,5 @@
 #include "cvector.h"
 #include <stdio.h>
-// #include <string.h>
 
 typedef struct {
     int sequence_no;
