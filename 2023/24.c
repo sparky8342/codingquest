@@ -95,8 +95,10 @@ int main() {
             turn_score += 100;
             fruit_i = next_fruit(fruit, fruit_i, &fruit_x, &fruit_y);
         } else {
+            struct Pos *old = dummy_tail->prev;
             dummy_tail->prev = dummy_tail->prev->prev;
             dummy_tail->prev->next = dummy_tail;
+            free(old);
         }
 
         // check for snake collision
