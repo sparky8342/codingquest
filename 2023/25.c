@@ -54,11 +54,15 @@ int main() {
 
     srand(time(NULL));
 
-    // run until the path doesn't seem to get smaller
-    // this doesn't always get the best solution
-    // I think it gets stuck in a local minima
-    // which would need more than 2 edges swapped
-    while (1) {
+    // random swap edges, keep the swap if it's shorter
+    // or allow a longer one 1/1000 times to avoid a
+    // local minima
+    // after 1000 runs with no improvement, stop
+    // this seems to work, with no guarantee of course
+
+    int shortest = total_distance((int *)distances, path, count);
+    int no_change = 0;
+    while (no_change < 1000) {
         int a = rand() % count;
         int b = rand() % count;
 
@@ -80,7 +84,7 @@ int main() {
         int dist2 = distances[path[a]][path[b]] +
                     distances[path[a + 1]][path[(b + 1) % count]];
 
-        if (dist2 <= dist1) {
+        if (dist2 <= dist1 || rand() % 1000 == 1) {
             int p1 = a + 1;
             int p2 = b;
             while (p1 < p2) {
@@ -91,8 +95,14 @@ int main() {
                 p2--;
             }
 
-            if (dist2 < dist1) {
-                printf("%d\n", total_distance((int *)distances, path, count));
+            int distance = total_distance((int *)distances, path, count);
+
+            if (distance < shortest) {
+                shortest = distance;
+                printf("%d\n", distance);
+                no_change = 0;
+            } else {
+                no_change++;
             }
         }
     }
