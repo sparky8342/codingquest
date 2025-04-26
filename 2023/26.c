@@ -7,11 +7,6 @@ struct Node {
     struct Node *right;
 } Node;
 
-struct Entry {
-    struct Node *node;
-    struct Entry *next;
-} Entry;
-
 int widths[100];
 
 void add_node(struct Node *node, struct Node *new_node) {
