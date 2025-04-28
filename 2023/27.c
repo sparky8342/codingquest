@@ -1,12 +1,74 @@
 #include "cvector.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define START "TYC"
+#define END "EAR"
+#define STOP_TIME 600
 
 typedef struct {
     char name[4];
     char **neighbours;
     int **distances;
+    int distance;
+    bool visited;
 } Beacon;
+
+int heap_parent(int i) { return (i - 1) / 2; }
+int heap_left(int i) { return 2 * i + 1; }
+int heap_right(int i) { return 2 * i + 2; }
+
+void **heap_insert(Beacon **heap, Beacon *beacon) {
+    cvector_push_back(heap, beacon);
+    int i = cvector_size(heap) - 1;
+    while (i != 0) {
+        int parent = heap_parent(i);
+        if (heap[parent]->distance > heap[i]->distance) {
+            Beacon *tmp = heap[parent];
+            heap[parent] = heap[i];
+            heap[i] = tmp;
+            i = parent;
+        } else {
+            break;
+        }
+    }
+}
+
+void min_heapify(Beacon **heap, int i) {
+    int l = heap_left(i);
+    int r = heap_right(i);
+    int smallest = i;
+    if (l < cvector_size(heap) && heap[l]->distance < heap[i]->distance) {
+        smallest = l;
+    }
+    if (r < cvector_size(heap) &&
+        heap[r]->distance < heap[smallest]->distance) {
+        smallest = r;
+    }
+    if (smallest != i) {
+        Beacon *tmp = heap[i];
+        heap[i] = heap[smallest];
+        heap[smallest] = tmp;
+        min_heapify(heap, smallest);
+    }
+}
+
+Beacon *heap_pop(Beacon **heap) {
+    Beacon *min = heap[0];
+    heap[0] = heap[cvector_size(heap) - 1];
+    cvector_pop_back(heap);
+    min_heapify(heap, 0);
+    return min;
+}
+
+Beacon *get_beacon(Beacon **beacons, char *name) {
+    for (int i = 0; i < cvector_size(beacons); i++) {
+        if (strncmp(beacons[i]->name, name, sizeof(name)) == 0) {
+            return beacons[i];
+        }
+    }
+}
 
 int main() {
     FILE *fptr;
@@ -15,8 +77,6 @@ int main() {
         printf("Cannot open file\n");
         return 1;
     }
-
-    // EAR => DEV:2694 MGE:4668 TYT:8730
 
     Beacon **beacons = NULL;
 
@@ -29,6 +89,8 @@ int main() {
         beacon->name[3] = '\0';
         beacon->neighbours = NULL;
         beacon->distances = NULL;
+        beacon->distance = 999999999;
+        beacon->visited = false;
 
         int i = 7;
         while (1) {
@@ -55,11 +117,31 @@ int main() {
         cvector_push_back(beacons, beacon);
     }
 
-    for (int i = 0; i < cvector_size(beacons); i++) {
-        printf("%s\n", beacons[i]->name);
-        for (int j = 0; j < cvector_size(beacons[i]->neighbours); j++) {
-            printf("    %s %d\n", beacons[i]->neighbours[j],
-                   *beacons[i]->distances[j]);
+    Beacon **heap = NULL;
+    Beacon *start = get_beacon(beacons, START);
+    start->distance = 0;
+    cvector_push_back(heap, start);
+
+    while (cvector_size(heap) > 0) {
+        Beacon *beacon = heap_pop(heap);
+
+        if (strncmp(beacon->name, END, 3) == 0) {
+            printf("%d\n", beacon->distance - STOP_TIME);
+            break;
+        }
+
+        if (beacon->visited) {
+            continue;
+        }
+        beacon->visited = true;
+
+        for (int i = 0; i < cvector_size(beacon->neighbours); i++) {
+            Beacon *neighbour = get_beacon(beacons, beacon->neighbours[i]);
+            int distance = beacon->distance + *beacon->distances[i] + STOP_TIME;
+            if (distance < neighbour->distance) {
+                neighbour->distance = distance;
+                heap_insert(heap, neighbour);
+            }
         }
     }
 
