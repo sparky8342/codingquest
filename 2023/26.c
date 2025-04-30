@@ -50,14 +50,14 @@ int main() {
     }
 
     char str[100];
-    fscanf(fptr, "%s", &str);
+    fscanf(fptr, "%s", str);
 
     struct Node *head = (struct Node *)malloc(sizeof(struct Node));
     head->val = strtol(str, NULL, 16);
     head->left = NULL;
     head->right = NULL;
 
-    while (fscanf(fptr, "%s", &str) == 1) {
+    while (fscanf(fptr, "%s", str) == 1) {
         struct Node *node = (struct Node *)malloc(sizeof(struct Node));
         node->val = strtol(str, NULL, 16);
         node->left = NULL;
