@@ -1,4 +1,5 @@
 #include "../utils/cvector.h"
+#include "../utils/ht.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,14 +63,6 @@ Beacon *heap_pop(Beacon **heap) {
     return min;
 }
 
-Beacon *get_beacon(Beacon **beacons, char *name) {
-    for (int i = 0; i < cvector_size(beacons); i++) {
-        if (strncmp(beacons[i]->name, name, sizeof(name)) == 0) {
-            return beacons[i];
-        }
-    }
-}
-
 int main() {
     FILE *fptr;
     fptr = fopen("inputs/27.txt", "r");
@@ -78,7 +71,7 @@ int main() {
         return 1;
     }
 
-    Beacon **beacons = NULL;
+    ht *beacons = ht_create();
 
     char buffer[100];
     while (fgets(buffer, sizeof(buffer), fptr) != NULL) {
@@ -114,11 +107,11 @@ int main() {
             i++;
         }
 
-        cvector_push_back(beacons, beacon);
+        ht_set(beacons, beacon->name, beacon);
     }
 
     Beacon **heap = NULL;
-    Beacon *start = get_beacon(beacons, START);
+    Beacon *start = ht_get(beacons, START);
     start->distance = 0;
     cvector_push_back(heap, start);
 
@@ -136,7 +129,7 @@ int main() {
         beacon->visited = true;
 
         for (int i = 0; i < cvector_size(beacon->neighbours); i++) {
-            Beacon *neighbour = get_beacon(beacons, beacon->neighbours[i]);
+            Beacon *neighbour = ht_get(beacons, beacon->neighbours[i]);
             int distance = beacon->distance + *beacon->distances[i] + STOP_TIME;
             if (distance < neighbour->distance) {
                 neighbour->distance = distance;
