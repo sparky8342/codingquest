@@ -1,5 +1,6 @@
-#include "../utils/cvector.h"
+#include "../utils/ht.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 int main() {
@@ -10,45 +11,32 @@ int main() {
         return 1;
     }
 
-    cvector_vector_type(char *) categories = NULL;
-    int **amounts = NULL;
+    ht *categories = ht_create();
 
     char category[100];
     int amount;
     while (fscanf(fptr, "%s %d %s", category, &amount, category) == 3) {
-        int category_no = -1;
-        for (int i = 0; i < cvector_size(categories); i++) {
-            if (strncmp(categories[i], category, sizeof(category)) == 0) {
-                category_no = i;
-                break;
-            }
-        }
-        if (category_no == -1) {
-            cvector_push_back(categories, strdup(category));
-            category_no = cvector_size(categories) - 1;
+        void *value = ht_get(categories, category);
+        if (value != NULL) {
+            int *cat_amount = (int *)value;
+            *cat_amount += amount;
+            continue;
         }
 
-        if (category_no == cvector_size(amounts)) {
-            int *n = malloc(sizeof(int));
-            *n = amount;
-            cvector_push_back(amounts, n);
-        } else {
-            int *total = *cvector_at(amounts, category_no);
-            *total += amount;
-        }
+        int *cat_amount = malloc(sizeof(int));
+        *cat_amount = amount;
+        ht_set(categories, category, cat_amount);
     }
 
     fclose(fptr);
 
     long product = 1;
-    for (int i = 0; i < cvector_size(amounts); i++) {
-        product *= *amounts[i] % 100;
+    hti it = ht_iterator(categories);
+    while (ht_next(&it)) {
+        product *= *(int *)it.value % 100;
     }
 
     printf("%ld\n", product);
-
-    cvector_free(categories);
-    cvector_free(amounts);
 
     return 0;
 }
