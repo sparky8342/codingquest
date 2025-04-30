@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "vector.h"
+#include "../utils/vector.h"
 
 int check_avg(int sum) {
     int avg = sum / 60;

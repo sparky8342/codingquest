@@ -1,6 +1,6 @@
 // sha256 code from: https://github.com/BareRose/lonesha256
 #define LONESHA256_STATIC
-#include "lonesha256.h"
+#include "../utils/lonesha256.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
