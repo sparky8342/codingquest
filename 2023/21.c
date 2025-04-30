@@ -7,9 +7,9 @@ typedef struct {
 } Chunk;
 
 int compare(const void *a, const void *b) {
-    Chunk *a_rect = *(Chunk **)a;
-    Chunk *b_rect = *(Chunk **)b;
-    return a_rect->sequence_no - b_rect->sequence_no;
+    Chunk *a_chunk = *(Chunk **)a;
+    Chunk *b_chunk = *(Chunk **)b;
+    return a_chunk->sequence_no - b_chunk->sequence_no;
 }
 
 int main() {
