@@ -1,0 +1,2 @@
+# for any code using ht.h and ht.c:
+# gcc -o main 18.c ../utils/ht.c
