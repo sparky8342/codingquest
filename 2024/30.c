@@ -2,8 +2,6 @@
 #include <stdio.h>
 
 int main() {
-    bool grid[8000];
-
     FILE *fptr;
     fptr = fopen("inputs/30.txt", "r");
     if (fptr == NULL) {
@@ -12,14 +10,22 @@ int main() {
     }
 
     int val = true;
-    int p = 0;
+    int col = 0;
     char c;
     int len = 0;
     while (c = fgetc(fptr)) {
         if (c == ' ' || c == '\n') {
             for (int i = 0; i < len; i++) {
-                grid[p] = val;
-                p++;
+                if (val) {
+                    printf("#");
+                } else {
+                    printf(".");
+                }
+                col++;
+                if (col == 100) {
+                    printf("\n");
+                    col = 0;
+                }
             }
             if (c == '\n') {
                 break;
@@ -31,17 +37,6 @@ int main() {
         }
     }
     fclose(fptr);
-
-    for (int y = 0; y < 80; y++) {
-        for (int x = 0; x < 100; x++) {
-            if (grid[y * 100 + x]) {
-                printf("#");
-            } else {
-                printf(".");
-            }
-        }
-        printf("\n");
-    }
 
     return 0;
 }
