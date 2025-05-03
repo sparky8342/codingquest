@@ -65,10 +65,6 @@ int main() {
 
     int size = cvector_size(outposts);
 
-    for (int i = 0; i < size; i++) {
-        printf("%s\n", outposts[i]);
-    }
-
     int distances[size][size];
 
     for (int i = 0; i < size; i++) {
@@ -76,13 +72,6 @@ int main() {
         for (int j = 0; j < size; j++) {
             fscanf(fptr, "%d", &distances[i][j]);
         }
-    }
-
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            printf("%d ", distances[i][j]);
-        }
-        printf("\n");
     }
 
     fgets(buffer, sizeof(buffer), fptr);
@@ -97,7 +86,6 @@ int main() {
             total +=
                 distance((int *)distances, size, outpost_id(outposts, route[i]),
                          outpost_id(outposts, route[i + 2]));
-            printf("%s %s\n", route[i], route[i + 2]);
         }
     }
 
