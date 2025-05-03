@@ -52,7 +52,7 @@ int main() {
             char str[8];
             int str_p = 0;
 
-            while (buffer[i] != ' ') {
+            while (buffer[i] != ' ' && buffer[i] != '\n') {
                 str[str_p] = buffer[i];
                 i++;
                 str_p++;
